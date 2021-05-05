@@ -1,8 +1,7 @@
 // for the lines of the file as soon as it is loaded
 let lines;
-
-const START_COORDINATES = [50, 50
-];
+let drawnWordsCount = 0;
+const START_COORDINATES = [50, 50];
 const CANVAS_HEIGHT = screen.height - 100;
 const CANVAS_WIDTH = screen.width - 100;
 const STAR_SIDE_LENGTH = 31;
@@ -105,6 +104,7 @@ function createChain(wordMap, firstWord, wordCount){
     for (let i = 1; i < wordCount; i++){
         if (!wordMap.has(nextWord)){
             console.error("nächstes Wort:" + nextWord + " nicht in der gesamt Map vorhanden");
+            return chain;
         }
         nextWordInfos = getNextWord(wordMap.get(nextWord));
         if (nextWordInfos == null){
@@ -123,6 +123,7 @@ where the next word should be drawn */
 function drawWord(wordInfos, startCoordinates){
     let returnCoordinates = drawStar(wordInfos, startCoordinates[0] + textWidth(wordInfos.word)/2, startCoordinates[1] + TEXT_HEIGHT/2);
     text(wordInfos.word, startCoordinates[0], startCoordinates[1], textWidth(wordInfos.word));
+    drawnWordsCount = drawnWordsCount + 2;
     return returnCoordinates;
 }
 
@@ -130,21 +131,25 @@ function drawStar(wordInfos, middleX, middleY){
     let distanceX;
     let distanceY;
     let returnCoordinates;
+    
     for(let i = 0; i < wordInfos.wordscount; i++){
-        let angle = i*((360/wordInfos.wordscount)*Math.PI/180);
+        push();
+        let angle = (i*((360/wordInfos.wordscount)*Math.PI/180)) + (drawnWordsCount % 6);
 
         if (i == wordInfos.indexInMap){
             distanceX = STAR_SIDE_LENGTH*1.5*Math.cos(angle);
             distanceY = STAR_SIDE_LENGTH*1.5*Math.sin(angle);
             returnCoordinates = [middleX + distanceX, middleY + distanceY];
+            stroke(80);
         } else {
             distanceX = STAR_SIDE_LENGTH*Math.cos(angle);
-            distanceY = STAR_SIDE_LENGTH*Math.sin(angle);  
+            distanceY = STAR_SIDE_LENGTH*Math.sin(angle); 
+            stroke(150); 
         }
     
         line(middleX, middleY, middleX + distanceX, middleY + distanceY);
+        pop()
     }
-
     return returnCoordinates;
 }
 
@@ -181,7 +186,6 @@ function getNextWord(nextWords){
             // anzahl der kandidaten
             // wort
         } 
-
         candidate = iterator.next();
         index++;
     }
@@ -191,13 +195,14 @@ function getNextWord(nextWords){
 }
 
 function preload(){
+    loadFont("resources/Bungee-Regular.ttf");
     lines = loadStrings("Beschreibungen.txt");
 }
 
 function setTextProperties(){
     background(200);
-    fill(51, 204, 51);
-    line(80);
+    fill(255, 0, 0);
+    textFont("Bungee-Regular");
     textSize(TEXT_HEIGHT);
     textStyle(BOLD);
 }
