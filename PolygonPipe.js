@@ -41,7 +41,7 @@ function draw(){
 
 function drawTube(){
     const TUBE_START = createVector(0,0,0);
-    const TUBE_LENGTH = 300;
+    const TUBE_LENGTH = 400;
     const TUBE_RADIUS = 70;
     const TUBE_STEPS = 5;
     const RING_STEPS = 15;
@@ -112,7 +112,7 @@ function drawSpiral(){
     const MAX_ANGLE = 400;
     const STEPS = 15;
     const HEIGHT_GROWTH = 0.5;
-    const SPIRAL_GROWTH = 0.5;
+    const SPIRAL_GROWTH = 0.6;
     const THICKNESS_GROWTH = 0.5;
 
     let radius = SPIRAL_GROWTH;
@@ -151,11 +151,6 @@ function drawSpiral(){
 
         oldVertices = newVertices
     }
-
-    // let joinedLastVertices = zipperJoin(oldVertices, firstVertices);
-    // joinedLastVertices.forEach(coords => {
-    //     allVertices.push(coords);
-    // })
 
     beginShape(TRIANGLE_STRIP);
     // console.log(allVertices);
