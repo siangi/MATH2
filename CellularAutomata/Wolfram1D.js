@@ -4,23 +4,43 @@ LINE_COUNT = LINE_LENGTH;
 //2D Arrays to save all previous States and the State of now
 let states = [];
 
-let ruleCode = ["0", "1", "0", "1", "0", "1", "0", "1"];
+let ruleCode = ["0", "0", "0", "1", "1", "1", "1", "0"];
 let productions;
 
 function setup(){
+    let black = color(0);
     createCanvas(LINE_LENGTH, LINE_COUNT);
     background(150);
+    initRuleset(ruleCode);
     setFirstline();
-    //initNextLine until enough Lines
-    //set the pixels on the Canvas
+    for(let i = 1; i < LINE_COUNT; i++){
+        states.push(initNextLine(states[i - 1]));
+    }
+    console.log(states)
+
+    for(let linesIdx = 0; linesIdx < LINE_COUNT; linesIdx++){
+        for (let elementIdx = 0; elementIdx < LINE_LENGTH; elementIdx++){
+            if (states[linesIdx][elementIdx] == "1"){
+                set(elementIdx, linesIdx, black);
+            }
+        }
+    }
+    updatePixels();
 }
 
 function draw(){
     
 }
 
-function initNextLine(){
-    productions.get("111");
+function initNextLine(previousLine){
+    nextLine = [];
+
+    for(let i = 0; i < previousLine.length; i++){
+        let newPoint = productions.get(getTriplet(previousLine, i));
+        nextLine.push(newPoint);
+    }
+
+    return nextLine;
 }
 
 function setFirstline(){
@@ -35,7 +55,18 @@ function setFirstline(){
 
 // returns the element at the index and its neighbours as a string.
 function getTriplet(lineArray, index){
+    if (index >= lineArray.length){
+        console.error("Index too big:" + index);
+        return "";
+    }
 
+    if (index == 0){
+        return lineArray[lineArray.length - 1] + lineArray[0] + lineArray[1];
+    } else if (index == (lineArray.length - 1)){
+        return lineArray[index - 1]  + lineArray[index] + lineArray[0]
+    } else {
+        return lineArray[index - 1] + lineArray[index] + lineArray[index + 1]
+    }
 }
 
 function initRuleset(ruleCode){
