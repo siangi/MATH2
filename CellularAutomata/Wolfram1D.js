@@ -1,10 +1,10 @@
-LINE_LENGTH = 55;
+LINE_LENGTH = 181;
 LINE_COUNT = LINE_LENGTH;
 
 //2D Arrays to save all previous States and the State of now
 let states = [];
 
-let ruleCode = ["0", "0", "0", "1", "1", "1", "1", "0"];
+let ruleCode = ["1", "0", "1", "1", "1", "1", "0", "0"];
 let productions;
 
 function setup(){
