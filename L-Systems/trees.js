@@ -1,37 +1,57 @@
 const CANVAS_HEIGHT = 800;
 const CANVAS_WIDTH = CANVAS_HEIGHT;
-const GENERATION_COUNT = 5;
-const TURN_ANGLE = 20;
-const START_LENGTH = 300;
-const LENGTH_FACTOR = 0.6;
+const GENERATION_COUNT = 4;
+const END_TURN_ANGLE = 50;
+const LENGTH_FACTOR = 0.5;
+const WEIGHT_FACTOR = 0.6;
 const STARTPOS = [400, 800];
 
+let startWeight = 20;
+let startLength = 300;
+
+let weight;
 let position;
 let length;
 let angle = 90;
 let savedStates = [];
+let turnAngle = 0;
 
 function setup(){
     createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
-    background(0);
     angleMode(DEGREES);
-    const REPLACE_RULE = "|[-F][+F]";
+    frameRate(10);
+    startLength -= END_TURN_ANGLE * 3;
+}
+
+function draw(){
+    if (turnAngle <= END_TURN_ANGLE){
+        background("#71d6ed");
+        turnAngle += 1;
+        startLength += 3;
+        makeTree(STARTPOS, "|[--F][-F][F][+F][++F]", startLength, startWeight);
+        push();
+        noStroke();
+        fill("#0caa4f");
+        ellipse(STARTPOS[0], STARTPOS[1], CANVAS_WIDTH, 100);
+        pop();
+    }    
+}
+
+function makeTree(startPos, rule, beginLength, beginWeight){
+    const REPLACE_RULE = rule;
     const TO_REPLACE = "F";
     let makerString = "F"
-    position = STARTPOS;
-    length = START_LENGTH;
+    position = startPos;
+    length = beginLength;
+    weight = beginWeight;
     console.log(makerString);
     
 
     for(i = 0; i < GENERATION_COUNT; i++){
         makerString = updateMakerString(makerString, TO_REPLACE, REPLACE_RULE);
-        console.log(makerString);
     }
 
     drawString(makerString);
-}
-
-function draw(){
 }
 
 function updateMakerString(startString, toReplace, replaceWith){
@@ -48,13 +68,13 @@ function drawString(makerString){
                 drawLine(true);
                 break;
             case "+":
-                angle += TURN_ANGLE;
+                angle += turnAngle;
                 break;
             case "-":
-                angle -= TURN_ANGLE;
+                angle -= turnAngle;
                 break;
             case "[":
-                newState = [position[0], position[1], angle, length];
+                newState = [position[0], position[1], angle, length, weight];
                 savedStates.push(newState);
                 break;
             case "]":
@@ -63,11 +83,12 @@ function drawString(makerString){
                 position[1] = loadedState[1];
                 angle = loadedState[2];
                 length = loadedState[3];
-                console.log(length);
+                weight = loadedState[4];
                 break;
             case "|":
                 drawLine(false);
                 length *= LENGTH_FACTOR;
+                weight *= WEIGHT_FACTOR;
                 break;
             default:
                 console.error("ungültiges Zeichen: " + character);
@@ -77,11 +98,25 @@ function drawString(makerString){
 }
 
 function drawLine(reverse){
-    stroke(255);
+    push();
+    
+    strokeWeight(weight);
+    console.log(weight + " " + startWeight*(WEIGHT_FACTOR*GENERATION_COUNT));
+
     distanceX = Math.cos(radians(angle)) * length;
     distanceY = Math.sin(radians(angle)) * length;
     newPos = [position[0] - distanceX, position[1] - distanceY];
-    line(position[0], position[1], newPos[0], newPos[1]);
-    circle(newPos[0], newPos[1], 10);
+
+    if (weight >= 2.6){
+        stroke("#54400e");
+        line(position[0], position[1], newPos[0], newPos[1]);
+    } else {
+        noStroke();
+        fill("#30540e");
+        circle(newPos[0], newPos[1], distanceY);
+    }
+    
+   
     position = newPos;
+    pop();
 }
