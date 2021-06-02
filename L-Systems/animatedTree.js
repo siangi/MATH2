@@ -25,12 +25,34 @@ function setup(){
 
 function draw(){
     if (turnAngle <= END_TURN_ANGLE){
-        background("#71d6ed");
+        let startcolor = color("#062b79");
+        let endcolor = color("#87CEEB");
+        let backcolor = lerpColor(startcolor, endcolor, turnAngle/END_TURN_ANGLE);
+        background(backcolor);
+
+        let sunStart = color("#ff7575");
+        let sunEnd = color("#fff671");
+        let sunColor = lerpColor(sunStart, sunEnd, turnAngle/END_TURN_ANGLE);
+        let sunY = lerp(CANVAS_HEIGHT, 0, turnAngle/END_TURN_ANGLE);
+        let sunX = lerp(CANVAS_WIDTH/2, CANVAS_WIDTH, turnAngle/END_TURN_ANGLE);
+        
+        push();
+        noStroke();
+        fill(sunColor);
+        circle(sunX, sunY, 150);
+        pop();
+
         turnAngle += 1;
         startLength += 3;
         makeTree(STARTPOS, "|[--F][-F][F][+F][++F]", startLength, startWeight);
+        push();
+        noStroke();
+        fill("#0caa4f");
+        ellipse(STARTPOS[0], STARTPOS[1] + 100, CANVAS_WIDTH*0.75, 300);
+        pop();
     }    
 }
+
 
 function makeTree(startPos, rule, beginLength, beginWeight){
     const REPLACE_RULE = rule;
@@ -95,10 +117,20 @@ function drawString(makerString){
 function drawLine(reverse){
     push();
     strokeWeight(weight);
-    distanceX = Math.cos(radians(angle)) * length;
-    distanceY = Math.sin(radians(angle)) * length;
+    let offsetLength = length;
+    distanceX = Math.cos(radians(angle)) * offsetLength;
+    distanceY = Math.sin(radians(angle)) * offsetLength;
     newPos = [position[0] - distanceX, position[1] - distanceY];
-    line(position[0], position[1], newPos[0], newPos[1]);  
+
+    if (weight >= 2.6){
+        stroke("#54400e");
+        line(position[0], position[1], newPos[0], newPos[1]);
+    } else {
+        noStroke();
+        fill("#30540e");
+        circle(newPos[0], newPos[1], random(8, 22));
+    }
+    
     position = newPos;
     pop();
 }
