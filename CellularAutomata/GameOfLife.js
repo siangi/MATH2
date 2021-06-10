@@ -1,4 +1,4 @@
-const PLAYFIELD_HEIGHT = 600;
+const PLAYFIELD_HEIGHT = 500;
 const PLAYFIELD_WIDTH = PLAYFIELD_HEIGHT;
 
 
@@ -7,64 +7,72 @@ const PLAYFIELD_WIDTH = PLAYFIELD_HEIGHT;
 let oldBoard;
 
 // coordinates of the live cells at start
-let startCells = [
-    [100, 100],
-    [99, 99],
-    [99, 98],
-    [99, 97],
-    [100, 97],
-    [101, 97],
-    [102, 97],
-    [103, 98],
-    [103, 100],
-    [200, 200],
-    [199, 199],
-    [199, 198],
-    [199, 197],
-    [200, 197],
-    [201, 197],
-    [202, 197],
-    [203, 198],
-    [203, 200],
-    [180, 180],
-    [179, 181],
-    [181, 181],
-    [178, 182],
-    [182, 182],
-    [178, 183],
-    [182, 183],
-    [178, 184],
-    [182, 184],
-    [178, 185],
-    [182, 185],
-    [178, 186],
-    [182, 186],
-    [178, 187],
-    [182, 187],
-    [179, 188],
-    [181, 188],
-    [180, 189]
-];
-
+let startCells;
 // all currently alive cells, so we dont have to loop the whole array constantly
-let oldAliveCells = startCells;
-let newAliveCells = startCells;
+let oldAliveCells;
+let newAliveCells;
+function startCellsFromForm(){
+    return pointCircle(20, 50, 50).concat(pointCircle(20, 20, 50)).concat(pointCircle(20, 70, 50));
+    // return pointCircle(20, 50, 50).concat(pointCircle(21, 50, 50));
+    // return pointLine(0, 50, 100, 50, 100)
+    //         .concat(pointLine(0, 20, 100, 20, 100))
+    //         .concat(pointLine(0, 80, 100, 80, 100));
+    // return pointLine(0, 0, 100, 100, 100)
+    //         .concat(pointLine(100, 0, 0, 100, 100))
+    //         .concat(pointLine(0, 50, 100, 50, 100))
+    //         .concat(pointLine(50, 0, 50, 100, 100));
+    // return pointCircle(50, 50, 50)
+    //         .concat(pointCircle(49, 50, 50))
+    //         .concat(pointCircle(48, 50, 50))
+    //         .concat(pointCircle(47, 50, 50))
+    //         .concat(pointCircle(49, 50, 50))
+    // return pointPolygon(3, 40, 50, 50);
+}
+function randomStartCells(minX, minY, maxX, maxY){
+    let points = new Array();
+    for(let x = minX; x < maxX; x++){
+        for(let y = minY; y < maxY; y++){
+            let rnd = random(0.0, 1.0);
+            if (rnd >= 0.5){
+                points.push([x, y]);
+            }
+        }
+    }
+    return points
+}
+
+function setRandomAmountOfCells(amount, minX, minY, maxX, maxY){
+    let points = new Array();
+
+    for (let i = 0; i < amount; i++){
+        x = Math.floor(random(minX, maxX));
+        y = Math.floor(random(minY, maxY));
+        points.push([x, y]);
+    }
+    return points;
+}
 
 function setup(){
     createCanvas(PLAYFIELD_WIDTH, PLAYFIELD_HEIGHT);
-    frameRate(15);
+    // startCells = randomStartCells(0, 0, 100, 100);
+    startCells = startCellsFromForm();
+    console.log(startCells);
+    oldAliveCells = startCells;
+    newAliveCells = startCells;
+    frameRate(1);
 }
 
 function draw(){
     background(150);
+    scale(5);
     initBoard();
 
     for (let i = 0; i < oldAliveCells.length; i++){
-        set(oldAliveCells[i][0], oldAliveCells[i][1], color(150));
+        point(oldAliveCells[i][0], oldAliveCells[i][1]);
     }
 
     for (let i = 0; i < newAliveCells.length; i++){
-        set(newAliveCells[i][0], newAliveCells[i][1], color(0));
+        point(newAliveCells[i][0], newAliveCells[i][1]);
     }
 
     updatePixels();
@@ -151,4 +159,108 @@ function initBoard(){
     oldAliveCells.forEach(coords => {
         oldBoard[coords[0]][coords[1]] = true;
     });
+}
+
+
+function pointCircle(radius, middleX, middleY){
+    pixelCount = Math.ceil(2*radius*Math.PI);
+
+    let hasPrevious = false;
+    let previousX = -1;
+    let previousY = -1;
+    let previousDistance = -1;
+    let firstX = -1;
+    let firstY = -1;
+    let points = new Array();
+    for(let i = 0; i < pixelCount; i++){
+    // the angle has to be converted from degrees to radians for the Math.sin and Math.cos
+    let angle = i*((360/pixelCount)*Math.PI/180); 
+
+    let distanceY = Math.round(radius*Math.sin(angle));
+    let distanceX = Math.round(radius*Math.cos(angle));
+    
+    if (hasPrevious){
+        points.push([middleX + distanceX, middleY + distanceY]);
+        points = lerpPoints(previousX, previousY, middleX + distanceX, middleY + distanceY, 50, points);
+    } else {
+        points.push([middleX + distanceX, middleY + distanceY]);        
+        firstX = middleX + distanceX;
+        firstY = middleY + distanceY;
+    }
+
+    hasPrevious = true;
+    previousX = middleX + distanceX;
+    previousY = middleY + distanceY
+    previousDistance = distanceX;
+    }
+
+    points.push([firstX, firstY]);
+    points = lerpPoints(previousX, previousY, firstX, firstY, 50, points);
+    return points;
+}  
+ 
+function lerpPoints(startX, startY, endX, endY, amountOfPoints, arrayToInsert){
+    for (i = 0; i < amountOfPoints; i++){
+        t = map(i, 0, amountOfPoints, 0, 1);
+        console.log(t);
+        newX = Math.round(lerp(startX, endX, t));
+        newY = Math.round(lerp(startY, endY, t));
+        arrayToInsert.push([newX, newY]);
+    }
+
+    return arrayToInsert;
+}
+
+function pointPolygon(sides, radius, middleX, middleY){
+    let hasPrevious = false;
+    let previousX = -1;
+    let previousY = -1;
+    let previousDistance = -1;
+    let firstX = -1;
+    let firstY = -1;
+    let points = new Array();
+    for(let i = 0; i < sides; i++){
+    // the angle has to be converted from degrees to radians for the Math.sin and Math.cos
+    let angle = i*((360/sides)*Math.PI/180); 
+
+    let distanceY = Math.round(radius*Math.sin(angle));
+    let distanceX = Math.round(radius*Math.cos(angle));
+    
+    if (hasPrevious){
+        points.push([middleX + distanceX, middleY + distanceY]);
+        points = lerpPoints(previousX, previousY, middleX + distanceX, middleY + distanceY, 50, points);
+    } else {
+        points.push([middleX + distanceX, middleY + distanceY]);        
+        firstX = middleX + distanceX;
+        firstY = middleY + distanceY;
+    }
+
+    hasPrevious = true;
+    previousX = middleX + distanceX;
+    previousY = middleY + distanceY
+    previousDistance = distanceX;
+    }
+
+    points.push([firstX, firstY]);
+    points = lerpPoints(previousX, previousY, firstX, firstY, 50, points);
+    return points;
+}  
+
+function pointLine(startX, startY, endX, endY, amountOfPoints){
+    let result = new Array();
+
+    result = lerpPoints(startX, startY, endX, endY, amountOfPoints, result);
+
+    return result;
+};
+ 
+function lerpPoints(startX, startY, endX, endY, amountOfPoints, arrayToInsert){
+    for (i = 0; i < amountOfPoints; i++){
+        t = map(i, 0, amountOfPoints, 0, 1);
+        newX = Math.round(lerp(startX, endX, t));
+        newY = Math.round(lerp(startY, endY, t));
+        arrayToInsert.push([newX, newY]);
+    }
+
+    return arrayToInsert;
 }

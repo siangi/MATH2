@@ -1,10 +1,10 @@
-LINE_LENGTH = 181;
+LINE_LENGTH = 501;
 LINE_COUNT = LINE_LENGTH;
 
 //2D Arrays to save all previous States and the State of now
 let states = [];
 
-let ruleCode = ["1", "0", "0", "1", "1", "1", "1", "0"];
+let ruleCode = ["0", "1", "1", "0", "1", "1", "1", "0"];
 let productions;
 
 function setup(){
@@ -50,7 +50,7 @@ function setFirstline(){
         states[0].push("0");
     }
 
-    states[0][30] = "1"
+    states[0][500] = "1"
 }
 
 // returns the element at the index and its neighbours as a string.

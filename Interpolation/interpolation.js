@@ -5,7 +5,7 @@ const Y_PADDING = 50;
 const FRACTAL_COUNT = 8;
 const FRACTAL_LEVELS = 4;
 const POINTS_FACTOR = 2;
-const PERSISTENCE = 0.5;
+const PERSISTENCE = 0.3;
 
 let red;
 

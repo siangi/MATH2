@@ -33,7 +33,7 @@ let img;
 var cam;
 
 function setup() {
-  createCanvas(600, 600, WEBGL);
+  createCanvas(400, 400, WEBGL);
   
   //Make sure we can use degree instead of radians
   angleMode(DEGREES);
@@ -55,17 +55,14 @@ function setup() {
   max_segments_s = floor(max_angle_s / angle_step_s);
 
   createEasyCam();
-  document.oncontextmenu = function() {
-    return false;
-  }
-  
-  document.onmousedown = function() {
-    return false;
-  }
-  draw();
- //set the FOV (so that the spiral fills the picture) 
-  //set the aspect ratio of the camera to the aspect ratio of the canvas
-  perspective(20, width / height);
+    document.oncontextmenu = function() {
+      return false;
+    }
+    
+    document.onmousedown = function() {
+      return false;
+    }
+    noStroke();
 }
 
 /*calculates the points on a circle in the x-y-plane 
@@ -79,6 +76,25 @@ function circle_x_y(angle, radius) {
 
 function draw() {
   background(220, 220, 220);
+
+  //make the spiral slowly rotate 
+  //this can be solved more elegantly, but this worrks
+  rotateZ(second());
+  rotateX(second());
+
+  //define some lights, else the material is not visible
+  ambientLight(150, 150, 150);
+  pointLight(255, 255, 255, 10, 160, 300);
+
+  //set the materiial of the spiral, 
+  //it is semi-transparent because it looks better
+  specularMaterial(20, 20, 240, 150);
+  shininess(20);
+
+  //at the moment the texture is unlit, this makes the spiral hard to see
+  //this is here for reference
+  //texture(img);
+  //randomSeed(99);
 
   /* the code fist calculates all vertices 
   and puts them in to the array vertices, 
@@ -100,7 +116,7 @@ function draw() {
       //change radius for a more natural look
       let r_l = rad_l + rad_l_step * i;
       //use the x value to change the radius
-      let p = circle_x_y(angle_l, val_s.x);
+      let p = circle_x_y(angle_l, r_l + val_s.x);
 
       //add the calculated y-value and the elevation to the height 
       p.z = p.z + val_s.y + (i * elevation_step);
@@ -136,27 +152,36 @@ function draw() {
 
     vertex(vertices[k].x,
       vertices[k].y,
-      vertices[k].z);
+      vertices[k].z,
+      random(0, 1), random(0, 1));
     vertex(vertices[k + 1].x,
       vertices[k + 1].y,
-      vertices[k + 1].z);
+      vertices[k + 1].z,
+      random(0, 1), random(0, 1));
+    vertex(vertices[next_round].x,
+      vertices[next_round].y,
+      vertices[next_round].z,
+      random(0, 1), random(0, 1));
+
 
     vertex(vertices[next_round].x,
       vertices[next_round].y,
-      vertices[next_round].z);
-
-
-    vertex(vertices[next_round].x,
-      vertices[next_round].y,
-      vertices[next_round].z);
+      vertices[next_round].z,
+      random(0, 1), random(0, 1));
 
     vertex(vertices[next_round_1].x,
       vertices[next_round_1].y,
-      vertices[next_round_1].z);
+      vertices[next_round_1].z,
+      random(0, 1), random(0, 1));
 
     vertex(vertices[k].x,
       vertices[k].y,
-      vertices[k].z);
+      vertices[k].z,
+      random(0, 1), random(0, 1));
+
   }
+
   endShape();
+
+
 }

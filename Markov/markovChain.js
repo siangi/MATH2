@@ -195,7 +195,7 @@ function getNextWord(nextWords){
 }
 
 function preload(){
-    loadFont("resources/Bungee-Regular.ttf");
+    loadFont("../resources/Bungee-Regular.ttf");
     lines = loadStrings("Beschreibungen.txt");
 }
 
