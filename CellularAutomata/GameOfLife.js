@@ -1,19 +1,21 @@
 const PLAYFIELD_HEIGHT = 500;
 const PLAYFIELD_WIDTH = PLAYFIELD_HEIGHT;
+const LEVELS = 2;
 
 
 // the old states to base the new ones on 
 // true means the cell is alive, false means it is not.
-let oldBoard;
-
+let colors = new Array(LEVELS);
+let oldBoard = new Array(LEVELS);
 // coordinates of the live cells at start
-let startCells;
+let startCells = new Array(LEVELS);
 // all currently alive cells, so we dont have to loop the whole array constantly
-let oldAliveCells;
-let newAliveCells;
+let oldAliveCells = new Array(LEVELS);
+let newAliveCells = new Array(LEVELS);
+let ticks = 0;
 function startCellsFromForm(){
-    return pointCircle(20, 50, 50).concat(pointCircle(20, 20, 50)).concat(pointCircle(20, 70, 50));
-    // return pointCircle(20, 50, 50).concat(pointCircle(21, 50, 50));
+    // return pointCircle(20, 50, 50).concat(pointCircle(20, 20, 50)).concat(pointCircle(20, 70, 50));
+    return pointCircle(20, 50, 50).concat(pointCircle(21, 50, 50));
     // return pointLine(0, 50, 100, 50, 100)
     //         .concat(pointLine(0, 20, 100, 20, 100))
     //         .concat(pointLine(0, 80, 100, 80, 100));
@@ -28,6 +30,7 @@ function startCellsFromForm(){
     //         .concat(pointCircle(49, 50, 50))
     // return pointPolygon(3, 40, 50, 50);
 }
+
 function randomStartCells(minX, minY, maxX, maxY){
     let points = new Array();
     for(let x = minX; x < maxX; x++){
@@ -55,11 +58,16 @@ function setRandomAmountOfCells(amount, minX, minY, maxX, maxY){
 function setup(){
     createCanvas(PLAYFIELD_WIDTH, PLAYFIELD_HEIGHT);
     // startCells = randomStartCells(0, 0, 100, 100);
-    startCells = startCellsFromForm();
+    startCells[0] = randomStartCells(0, 0, 100, 100);
+    startCells[1] = startCellsFromForm();
+    colors[0] = color(195);
+    colors[1] = color(255, 0, 0);
     console.log(startCells);
-    oldAliveCells = startCells;
-    newAliveCells = startCells;
-    frameRate(1);
+    oldAliveCells[0] = startCells[0];
+    oldAliveCells[1] = startCells[1];
+    newAliveCells[0] = startCells[0]
+    newAliveCells[1] = startCells[1];
+    frameRate(8);
 }
 
 function draw(){
@@ -67,98 +75,113 @@ function draw(){
     scale(5);
     initBoard();
 
-    for (let i = 0; i < oldAliveCells.length; i++){
-        point(oldAliveCells[i][0], oldAliveCells[i][1]);
-    }
-
-    for (let i = 0; i < newAliveCells.length; i++){
-        point(newAliveCells[i][0], newAliveCells[i][1]);
-    }
+    for(let z = 0; z < LEVELS; z++){
+        for (let i = 0; i < oldAliveCells[z].length; i++){
+            push();
+            stroke(colors[z]);
+            point(oldAliveCells[z][i][0], oldAliveCells[z][i][1]);
+            pop();
+        }
+        // wieso beide??
+        for (let i = 0; i < newAliveCells[z].length; i++){
+            push();
+            stroke(colors[z]);
+            point(newAliveCells[z][i][0], newAliveCells[z][i][1]);
+            pop();
+        }
+    }   
 
     updatePixels();
-    tick();
+    tick(0);
+    if (ticks % 3 == 0){
+        tick(1);
+    }
+    
+    ticks++;
     initBoard();
 }
 
-function tick(){
-    oldAliveCells = null;
-    oldAliveCells = newAliveCells;
-    newAliveCells = [];
+function tick(level){
+    oldAliveCells[level] = null;
+    oldAliveCells[level] = newAliveCells[level];
+    newAliveCells[level] = [];
 
-    oldAliveCells.forEach(coords => {
-        setNextStateOfCell(coords[0] - 1, coords[1] - 1); // NW
-        setNextStateOfCell(coords[0], coords[1] - 1); // N
-        setNextStateOfCell(coords[0] + 1, coords[1] - 1); // NE
-        setNextStateOfCell(coords[0] - 1, coords[1]); //W
-        setNextStateOfCell(coords[0], coords[1]); // Center
-        setNextStateOfCell(coords[0] + 1, coords[1]); //E
-        setNextStateOfCell(coords[0] - 1, coords[1] + 1); // SW
-        setNextStateOfCell(coords[0] , coords[1] + 1); //S
-        setNextStateOfCell(coords[0] + 1, coords[1] + 1); //SE
+    oldAliveCells[level].forEach(coords => {
+        setNextStateOfCell(coords[0] - 1, coords[1] - 1, level); // NW
+        setNextStateOfCell(coords[0], coords[1] - 1, level); // N
+        setNextStateOfCell(coords[0] + 1, coords[1] - 1, level); // NE
+        setNextStateOfCell(coords[0] - 1, coords[1], level); //W
+        setNextStateOfCell(coords[0], coords[1], level); // Center
+        setNextStateOfCell(coords[0] + 1, coords[1], level); //E
+        setNextStateOfCell(coords[0] - 1, coords[1] + 1, level); // SW
+        setNextStateOfCell(coords[0] , coords[1] + 1, level); //S
+        setNextStateOfCell(coords[0] + 1, coords[1] + 1, level); //SE
     });
 }
 
-function setNextStateOfCell(x, y){
-    if (x < 0 || y < 0 || x >= PLAYFIELD_WIDTH || y >= PLAYFIELD_HEIGHT){
+function setNextStateOfCell(x, y, z){
+    if (x < 0 || y < 0 || z < 0 || x >= PLAYFIELD_WIDTH || y >= PLAYFIELD_HEIGHT || z >= LEVELS){
         return;
     }
 
-    if (isCellinAliveArray(x, y)){
+    if (isCellinAliveArray(x, y, z)){
         return;
     }
 
-    let liveNeighbourCount = getNeighbouringLiveCellCount(x, y);
-    let isAlive = cellAlive(x, y);
+    let liveNeighbourCount = getNeighbouringLiveCellCount(x, y, z);
+    let isAlive = cellAlive(x, y, z);
     // console.log(liveNeighbourCount);
     
     if((liveNeighbourCount == 2 && isAlive)){
-        newAliveCells.push([x, y]);
+        newAliveCells[z].push([x, y]);
     } else if ((liveNeighbourCount == 3)){
-        newAliveCells.push([x, y]);
+        newAliveCells[z].push([x, y]);
     }
 }
 
-function isCellinAliveArray(x, y){
-    for(let i = 0; i < newAliveCells.length; i++){
-        if (newAliveCells[i][0] == x && newAliveCells[i][1] == y){
+function isCellinAliveArray(x, y, z){
+    for(let i = 0; i < newAliveCells[z].length; i++){
+        if (newAliveCells[z][i][0] == x && newAliveCells[z][i][1] == y){
             return true;
         }
     }
     return false;
 }
 
-function getNeighbouringLiveCellCount(x , y){
+function getNeighbouringLiveCellCount(x , y, z){
     let liveNeighbourCount =  0;
 
-    if (cellAlive(x - 1, y -1 )) { liveNeighbourCount++}
-    if (cellAlive(x, y -1 )) { liveNeighbourCount++}
-    if (cellAlive(x + 1, y -1 )) { liveNeighbourCount++}
-    if (cellAlive(x - 1, y)) { liveNeighbourCount++}
-    if (cellAlive(x + 1, y)) { liveNeighbourCount++}
-    if (cellAlive(x - 1, y  + 1 )) { liveNeighbourCount++}
-    if (cellAlive(x, y + 1 )) { liveNeighbourCount++}
-    if (cellAlive(x + 1, y + 1 )) { liveNeighbourCount++}
+    if (cellAlive(x - 1, y -1, z)) { liveNeighbourCount++}
+    if (cellAlive(x, y -1, z)) { liveNeighbourCount++}
+    if (cellAlive(x + 1, y -1, z)) { liveNeighbourCount++}
+    if (cellAlive(x - 1, y, z)) { liveNeighbourCount++}
+    if (cellAlive(x + 1, y, z)) { liveNeighbourCount++}
+    if (cellAlive(x - 1, y + 1, z)) { liveNeighbourCount++}
+    if (cellAlive(x, y + 1, z)) { liveNeighbourCount++}
+    if (cellAlive(x + 1, y + 1, z)) { liveNeighbourCount++}
 
     return liveNeighbourCount;
 }
 
-function cellAlive(x, y){
-    if (x < 0 || y < 0 || x >= PLAYFIELD_WIDTH || y >= PLAYFIELD_HEIGHT){
+function cellAlive(x, y, z){
+    if (x < 0 || y < 0 || z < 0 || x >= PLAYFIELD_WIDTH || y >= PLAYFIELD_HEIGHT || z >= LEVELS){
         return false;
     } 
 
-    return oldBoard[x][y] === true;
+    return oldBoard[z][x][y] === true;
 }
 
 function initBoard(){
-    oldBoard = new Array(PLAYFIELD_WIDTH);
-    for (let i = 0; i < PLAYFIELD_WIDTH; i++){
-        oldBoard[i] = new Array(PLAYFIELD_HEIGHT);
-    }
+    for(let z = 0; z < LEVELS; z++){
+        oldBoard[z] = new Array(PLAYFIELD_WIDTH);
+        for (let x = 0; x < PLAYFIELD_WIDTH; x++){
+            oldBoard[z][x] = new Array(PLAYFIELD_HEIGHT);
+        }
 
-    oldAliveCells.forEach(coords => {
-        oldBoard[coords[0]][coords[1]] = true;
-    });
+        oldAliveCells[z].forEach(coords => {
+            oldBoard[z][coords[0]][coords[1]] = true;
+        });
+    }    
 }
 
 

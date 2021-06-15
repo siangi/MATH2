@@ -43,11 +43,12 @@ function makeTree(startPos, rule, beginLength, beginWeight){
     for(i = 0; i < GENERATION_COUNT; i++){
         makerString = updateMakerString(makerString, TO_REPLACE, REPLACE_RULE);
     }
-    let mainTree = new Tree(startLength, turnAngle, position, makerString, startWeight);
+    let mainTree = new Tree(startLength, turnAngle, position, makerString, 25, color(255), color(0,180, 0), 5);
 
     for(i = 7; i > 0; i--){
         let position2 =[(8 - i)*100, startPos[1]];
-        let sideTree = new Tree(startLength*(1/i), turnAngle, position2, makerString, startWeight*(2/i));
+        let sideTree = new Tree(startLength*(1/i), turnAngle, position2, makerString, 
+            startWeight*(2/i), color(255*i/7), color(0, 0, 0), 0);
         drawString(sideTree);
     }
     drawString(mainTree);
@@ -104,11 +105,21 @@ function drawString(tree){
 
 function drawLine(reverse, tree){
     push();
-    strokeWeight(tree.weight);
+    
     distanceX = Math.cos(radians(tree.currentAngle)) * tree.length;
     distanceY = Math.sin(radians(tree.currentAngle)) * tree.length;
     newPos = [tree.currentPos[0] - distanceX, tree.currentPos[1] - distanceY];
-    line(tree.currentPos[0], tree.currentPos[1], newPos[0], newPos[1]);  
+    
+      
+    if (tree.weight >= tree.leafCutoff){
+        stroke(tree.branchColor);
+        strokeWeight(tree.weight);
+        line(tree.currentPos[0], tree.currentPos[1], newPos[0], newPos[1]);
+    } else {
+        noStroke();
+        fill(tree.leafColor);
+        circle(newPos[0], newPos[1], random(8, 22));
+    }
     tree.currentPos = newPos;
     pop();
     return tree;

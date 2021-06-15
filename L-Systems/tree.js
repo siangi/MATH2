@@ -1,5 +1,5 @@
 class Tree {
-    constructor(startLength, turnAngle, startPos, generatorString, startWeight){
+    constructor(startLength, turnAngle, startPos, generatorString, startWeight, branchColor, leafColor, leafCutoff){
         this.length = startLength;
         this.turnAngle = turnAngle;
         this.startPos = startPos;
@@ -10,6 +10,9 @@ class Tree {
         this.states = new Array();
         this.currentPos = startPos;
         this.currentAngle = 90;
+        this.branchColor = branchColor;
+        this.leafColor = leafColor;
+        this.leafCutoff = leafCutoff;
     }
 
     saveState(){
