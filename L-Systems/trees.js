@@ -70,31 +70,19 @@ function drawString(tree){
                 break;
             case "+":
                 localTree.addAngle();
-                // angle += turnAngle;
                 break;
             case "-":
                 localTree.subtractAngle();
-                // angle -= turnAngle;
                 break;
             case "[":
                 localTree.saveState();
-                // newState = [position[0], position[1], angle, length, weight];
-                // savedStates.push(newState);
                 break;
             case "]":
-                // let loadedState = savedStates.pop();
-                // position[0] = loadedState[0];
-                // position[1] = loadedState[1];
-                // angle = loadedState[2];
-                // length = loadedState[3];
-                // weight = loadedState[4];
                 localTree.loadPreviousState();
                 break;
             case "|":
                 localTree = drawLine(false, tree);
                 localTree.alterLengthAndWeight();
-                // length *= LENGTH_FACTOR;
-                // weight *= WEIGHT_FACTOR;
                 break;
             default:
                 console.error("ungültiges Zeichen: " + character);
